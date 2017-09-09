@@ -15,14 +15,14 @@ cp $HOME/.zpacker/.zshrc.example $HOME/.zshrc
 source $HOME/.zpacker/zpacker.zsh
 
 # git plugin from famous oh-my-zsh
-zpacker pack 'robbyrussell/oh-my-zsh' lib/git.zsh
+zpacker plugin 'robbyrussell/oh-my-zsh' lib/git.zsh
 
 # syntax highlighting
-zpacker pack 'zsh-users/zsh-syntax-highlighting' 
+zpacker plugin 'zsh-users/zsh-syntax-highlighting'
 
 # for theme
 zpacker theme 'happyslowly/clean'
 
 # local profiles
-zpacker local $HOME/.profiles 
+zpacker local $HOME/.profiles
 ```

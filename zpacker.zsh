@@ -6,26 +6,29 @@ REPOS=$ROOT/.repos
 [ -d $REPOS ] || mkdir -p $REPOS
 
 GITHUB=https://github.com
-OH_MY_ZSH=oh-my-zsh
-
-autoload -U compaudit compinit
 
 zpacker() {
     option=$1
 
     case $option in
-        refresh)
+        upgrade)
             for repo in $REPOS/*
             do
                 echo "refreshing $repo ..."
                 cd $repo && git pull && cd - >/dev/null
             done
-            # source profile again
-            source $HOME/.zshrc
             ;;
-        pack)
+        clean)
+            candidates=$(comm -23 <(\ls .zpacker/.repos/ | sort -u) \
+                <(egrep 'plugin|theme' .zshrc | awk '{print $3}' | tr -d "'" | awk -F"/" '{print $2}' | sort -u))
+            echo $candidates | while read candidate
+            do
+                rm -r $REPOS/$candidate
+            done
+            ;;
+        plugin)
             shift
-            _zpacker_pack $*
+            _zpacker_plugin $*
             ;;
         theme)
             shift
@@ -35,15 +38,19 @@ zpacker() {
             shift
             _zpacker_local $*
             ;;
+        end)
+            # some housekeeping work
+            # autocomplete
+            autoload -U compinit && compinit
+            zstyle ':completion:*' menu select=2
+            ;;
         *)
             cat <<EOF
 zpacker <option> [arguments]
 
 where options:
-  refresh       - refresh the local plugin repos
-  pack          - load plugin
-  theme         - load theme
-  local         - load local personal profiles
+    upgrade     - upgrade plugins
+    clean       - cleanup non used plugins
 EOF
             ;;
     esac
@@ -63,7 +70,7 @@ _zpacker_clone_repo() {
     fi
 }
 
-_zpacker_pack() {
+_zpacker_plugin() {
     name=$(_zpacker_clone_repo $1)
 
     shift
@@ -71,8 +78,10 @@ _zpacker_pack() {
     if [ $# -eq 0 ]; then
         if [ -f $REPOS/$name/$name.zsh ]; then
             source $REPOS/$name/$name.zsh
+        elif [ -f $REPOS/$name/$name.sh ]; then
+            source $REPOS/$name/$name.sh
         else
-            for possible in $REPOS/$name/*.zsh
+            for possible in $REPOS/$name/*.(zsh|sh)
             do
                 source $possible
             done
@@ -88,7 +97,15 @@ _zpacker_pack() {
 _zpacker_theme() {
     autoload -U colors && colors
     setopt PROMPT_SUBST
+
     name=$(_zpacker_clone_repo $1)
+
+    shift
+
+    for dependency in $*
+    do
+        source $REPOS/$name/$dependency
+    done
 
     if [ -f $REPOS/$name/${name}.zsh-theme ]; then
         source $REPOS/$name/${name}.zsh-theme
