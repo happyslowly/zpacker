@@ -28,3 +28,7 @@ zpacker local $HOME/.profiles
 
 zpacker end
 ```
+
+## License
+
+[MIT](LICENSE.txt)
