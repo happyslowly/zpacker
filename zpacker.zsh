@@ -6,6 +6,7 @@ REPOS=$ROOT/.repos
 [ -d $REPOS ] || mkdir -p $REPOS
 
 GITHUB=https://github.com
+OHMYZSH=oh-my-zsh
 
 zpacker() {
     option=$1
@@ -102,12 +103,22 @@ _zpacker_theme() {
 
     shift
 
+    if [[ "$name" == "$OHMYZSH" ]]; then
+        omz_theme=$1
+        shift
+    else
+        theme_path=$name
+    fi
+
+    #source theme depdencencies
     for dependency in $*
     do
         source $REPOS/$name/$dependency
     done
 
-    if [ -f $REPOS/$name/${name}.zsh-theme ]; then
+    if [ -f $REPOS/$name/$omz_theme ]; then
+        source $REPOS/$name/$omz_theme
+    elif [ -f $REPOS/$name/${name}.zsh-theme ]; then
         source $REPOS/$name/${name}.zsh-theme
     elif [ -f $REPOS/$name/${name}.zsh ]; then
         source $REPOS/$name/${name}.zsh
