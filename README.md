@@ -25,4 +25,6 @@ zpacker theme 'happyslowly/clean'
 
 # local profiles
 zpacker local $HOME/.profiles
+
+zpacker end
 ```
